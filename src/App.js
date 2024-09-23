@@ -13,28 +13,39 @@ const FinanceApp = () => {
   const [type, setType] = useState('expense');
 
   useEffect(() => {
-    // Aqui você faria uma chamada API para buscar as transações
-    // Por enquanto, vamos usar dados de exemplo
-    setTransactions([
-      { id: 1, description: 'Salário', amount: 3000, type: 'income', date: '2024-09-01' },
-      { id: 2, description: 'Aluguel', amount: -1000, type: 'expense', date: '2024-09-05' },
-      { id: 3, description: 'Supermercado', amount: -300, type: 'expense', date: '2024-09-10' },
-    ]);
+    fetchTransactions();
   }, []);
-
-  const handleSubmit = (e) => {
+  
+  const fetchTransactions = async () => {
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('*')
+      .order('date', { ascending: false });
+  
+    if (error) console.error('Error fetching transactions:', error);
+    else setTransactions(data);
+  };
+  
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newTransaction = {
-      id: Date.now(),
       description,
       amount: type === 'expense' ? -Number(amount) : Number(amount),
       type,
       date: new Date().toISOString().split('T')[0],
     };
-    setTransactions([...transactions, newTransaction]);
-    setDescription('');
-    setAmount('');
-    setType('expense');
+  
+    const { data, error } = await supabase
+      .from('transactions')
+      .insert([newTransaction]);
+  
+    if (error) console.error('Error inserting transaction:', error);
+    else {
+      setTransactions([...transactions, data[0]]);
+      setDescription('');
+      setAmount('');
+      setType('expense');
+    }
   };
 
   const deleteTransaction = (id) => {
