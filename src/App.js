@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { supabase } from './supabase'; // Certifique-se de que esse caminho está correto
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const FinanceApp = () => {
   const [transactions, setTransactions] = useState([]);
@@ -18,8 +22,11 @@ const FinanceApp = () => {
       .select('*')
       .order('date', { ascending: false });
 
-    if (error) console.error('Error fetching transactions:', error);
-    else setTransactions(data);
+    if (error) {
+      console.error('Error fetching transactions:', error);
+    } else {
+      setTransactions(data);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -35,12 +42,15 @@ const FinanceApp = () => {
       .from('transactions')
       .insert([newTransaction]);
 
-    if (error) console.error('Error inserting transaction:', error);
-    else {
-      setTransactions([...transactions, data[0]]);
+    if (error) {
+      console.error('Error inserting transaction:', error);
+    } else if (data && data.length > 0) {
+      fetchTransactions();
       setDescription('');
       setAmount('');
       setType('expense');
+    } else {
+      console.error('No data returned after insertion.');
     }
   };
 
@@ -50,11 +60,42 @@ const FinanceApp = () => {
       .delete()
       .match({ id });
 
-    if (error) console.error('Error deleting transaction:', error);
-    else setTransactions(transactions.filter(t => t.id !== id));
+    if (error) {
+      console.error('Error deleting transaction:', error);
+    } else {
+      fetchTransactions();
+    }
   };
 
   const balance = transactions.reduce((acc, curr) => acc + curr.amount, 0);
+
+  // Dados do gráfico
+  const chartData = {
+    labels: ['Receitas', 'Despesas'],
+    datasets: [
+      {
+        label: 'Valor',
+        data: [
+          transactions.filter(t => t.type === 'income').reduce((acc, curr) => acc + curr.amount, 0),
+          Math.abs(transactions.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0)),
+        ],
+        backgroundColor: ['#4caf50', '#f44336'],
+      },
+    ],
+  };
+
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'Resumo de Transações',
+      },
+    },
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -116,6 +157,10 @@ const FinanceApp = () => {
             </li>
           ))}
         </ul>
+      </div>
+
+      <div className="mt-6 p-4 border rounded shadow">
+        <Bar data={chartData} options={options} />
       </div>
     </div>
   );
