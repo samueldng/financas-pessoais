@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { supabase } from './supabase'; // Certifique-se de que esse caminho está correto
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -15,7 +15,7 @@ const FinanceApp = () => {
 
   const fetchTransactions = async () => {
     const { data, error } = await supabase
-      .from('transactions')
+      .from('transactionsj') // Alterado para transactionsj
       .select('*')
       .order('date', { ascending: false });
 
@@ -33,7 +33,7 @@ const FinanceApp = () => {
     };
 
     const { error } = await supabase
-      .from('transactions')
+      .from('transactionsj') // Alterado para transactionsj
       .insert([newTransaction]);
 
     if (error) {
@@ -49,7 +49,7 @@ const FinanceApp = () => {
 
   const deleteTransaction = async (id) => {
     const { error } = await supabase
-      .from('transactions')
+      .from('transactionsj') // Alterado para transactionsj
       .delete()
       .match({ id });
 
