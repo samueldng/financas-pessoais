@@ -36,8 +36,10 @@ const FinanceApp = () => {
       .from('transactions')
       .insert([newTransaction]);
 
-    if (error) console.error('Error inserting transaction:', error);
-    else {
+    if (error) {
+      console.error('Error inserting transaction:', error);
+    } else {
+      // Atualiza a lista de transações após inserção
       fetchTransactions();
       setDescription('');
       setAmount('');
@@ -51,8 +53,12 @@ const FinanceApp = () => {
       .delete()
       .match({ id });
 
-    if (error) console.error('Error deleting transaction:', error);
-    else fetchTransactions();
+    if (error) {
+      console.error('Error deleting transaction:', error);
+    } else {
+      // Atualiza a lista de transações após exclusão
+      fetchTransactions();
+    }
   };
 
   const balance = transactions.reduce((acc, curr) => acc + curr.amount, 0);
