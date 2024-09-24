@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+<<<<<<< HEAD
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,6 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input'; 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/supabase'; // Verifique se o caminho está correto
+=======
+import { supabase } from './supabase';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
+import { PlusCircle, Trash2 } from '@heroicons/react/outline';
+>>>>>>> 7bffb865420d7ab748fb37b7e4166cd5b1c70d23
 
 const FinanceApp = () => {
   const [transactions, setTransactions] = useState([]);
@@ -36,13 +42,15 @@ const FinanceApp = () => {
       date: new Date().toISOString().split('T')[0],
     };
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('transactions')
       .insert([newTransaction]);
 
-    if (error) console.error('Error inserting transaction:', error);
-    else {
-      setTransactions([...transactions, data[0]]);
+    if (error) {
+      console.error('Error inserting transaction:', error);
+    } else {
+      // Atualiza a lista de transações após inserção
+      fetchTransactions();
       setDescription('');
       setAmount('');
       setType('expense');
@@ -55,17 +63,35 @@ const FinanceApp = () => {
       .delete()
       .match({ id });
 
-    if (error) console.error('Error deleting transaction:', error);
-    else setTransactions(transactions.filter(t => t.id !== id));
+    if (error) {
+      console.error('Error deleting transaction:', error);
+    } else {
+      // Atualiza a lista de transações após exclusão
+      fetchTransactions();
+    }
   };
 
   const balance = transactions.reduce((acc, curr) => acc + curr.amount, 0);
 
+<<<<<<< HEAD
   // Prepare data for the chart
   const chartData = transactions.map(t => ({
     date: t.date,
     amount: t.amount,
   }));
+=======
+  // Dados do gráfico
+  const chartData = [
+    {
+      name: 'Receitas',
+      value: transactions.filter(t => t.type === 'income').reduce((acc, curr) => acc + curr.amount, 0),
+    },
+    {
+      name: 'Despesas',
+      value: Math.abs(transactions.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0)),
+    },
+  ];
+>>>>>>> 7bffb865420d7ab748fb37b7e4166cd5b1c70d23
 
   return (
     <div className="container mx-auto p-4">
@@ -119,6 +145,7 @@ const FinanceApp = () => {
         </Card>
       </div>
 
+<<<<<<< HEAD
       <Card className="mt-6">
         <CardHeader>
           <CardTitle>Histórico de Transações</CardTitle>
@@ -157,6 +184,36 @@ const FinanceApp = () => {
           </ResponsiveContainer>
         </CardContent>
       </Card>
+=======
+      <div className="mt-6 p-4 border rounded shadow">
+        <h2 className="text-xl font-bold mb-4">Histórico de Transações</h2>
+        <ul className="space-y-2">
+          {transactions.map(t => (
+            <li key={t.id} className="flex justify-between items-center p-2 bg-gray-100 rounded">
+              <span>{t.description}</span>
+              <span className={t.amount >= 0 ? 'text-green-600' : 'text-red-600'}>
+                R$ {Math.abs(t.amount).toFixed(2)}
+              </span>
+              <button onClick={() => deleteTransaction(t.id)} className="text-red-500">
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="mt-6 p-4 border rounded shadow">
+        <h2 className="text-xl font-bold mb-4">Resumo de Transações</h2>
+        <BarChart width={500} height={300} data={chartData}>
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <CartesianGrid strokeDasharray="3 3" />
+          <Legend />
+          <Bar dataKey="value" fill="#4caf50" />
+        </BarChart>
+      </div>
+>>>>>>> 7bffb865420d7ab748fb37b7e4166cd5b1c70d23
     </div>
   );
 };
