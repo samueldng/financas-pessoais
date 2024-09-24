@@ -125,4 +125,39 @@ const FinanceApp = () => {
         <CardContent>
           <ul className="space-y-2">
             {transactions.map(t => (
-              <li key={
+              <li key={t.id} className="flex justify-between items-center p-2 bg-gray-100 rounded">
+                <span>{t.description}</span>
+                <span className={t.amount >= 0 ? 'text-green-600' : 'text-red-600'}>
+                  R$ {Math.abs(t.amount).toFixed(2)}
+                </span>
+                <Button variant="ghost" onClick={() => deleteTransaction(t.id)}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Gráfico de Transações</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="amount" stroke="#8884d8" />
+            </LineChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default FinanceApp;
