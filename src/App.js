@@ -32,13 +32,15 @@ const FinanceApp = () => {
       date: new Date().toISOString().split('T')[0],
     };
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('transactions')
       .insert([newTransaction]);
 
-    if (error) console.error('Error inserting transaction:', error);
-    else {
-      setTransactions([...transactions, data[0]]);
+    if (error) {
+      console.error('Error inserting transaction:', error);
+    } else {
+      // Atualiza o histórico de transações
+      fetchTransactions();
       setDescription('');
       setAmount('');
       setType('expense');
@@ -52,7 +54,7 @@ const FinanceApp = () => {
       .match({ id });
 
     if (error) console.error('Error deleting transaction:', error);
-    else setTransactions(transactions.filter(t => t.id !== id));
+    else fetchTransactions(); // Atualiza após a exclusão
   };
 
   const balance = transactions.reduce((acc, curr) => acc + curr.amount, 0);
