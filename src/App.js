@@ -32,7 +32,7 @@ const FinanceApp = () => {
       date: new Date().toISOString().split('T')[0],
     };
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('transactions')
       .insert([newTransaction]);
 
