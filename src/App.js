@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { PlusCircle, Trash2 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { supabase } from './supabase';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from './supabase'; // Importando a configuração do Supabase
 
-const App = () => {
+const FinanceApp = () => {
   const [transactions, setTransactions] = useState([]);
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -51,9 +56,7 @@ const App = () => {
       .match({ id });
 
     if (error) console.error('Error deleting transaction:', error);
-    else {
-      setTransactions(transactions.filter(t => t.id !== id));
-    }
+    else setTransactions(transactions.filter(t => t.id !== id));
   };
 
   const balance = transactions.reduce((acc, curr) => acc + curr.amount, 0);
@@ -68,81 +71,93 @@ const App = () => {
       <h1 className="text-3xl font-bold mb-6">Finanças Pessoais</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Adicionar Transação</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <input
-              className="w-full p-2 border rounded"
-              placeholder="Descrição"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-            />
-            <input
-              className="w-full p-2 border rounded"
-              type="number"
-              placeholder="Valor"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              required
-            />
-            <select
-              className="w-full p-2 border rounded"
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-            >
-              <option value="expense">Despesa</option>
-              <option value="income">Receita</option>
-            </select>
-            <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-              Adicionar
-            </button>
-          </form>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Adicionar Transação</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Input
+                placeholder="Descrição"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                required
+              />
+              <Input
+                type="number"
+                placeholder="Valor"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                required
+              />
+              <Select value={type} onValueChange={setType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Tipo de transação" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="expense">Despesa</SelectItem>
+                  <SelectItem value="income">Receita</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button type="submit" className="w-full">
+                <PlusCircle className="mr-2 h-4 w-4" /> Adicionar
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
 
-        <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Saldo Atual</h2>
-          <p className={`text-4xl font-bold ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            R$ {balance.toFixed(2)}
-          </p>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Saldo Atual</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className={`text-4xl font-bold ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              R$ {balance.toFixed(2)}
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="bg-white shadow rounded-lg p-6 mt-6">
-        <h2 className="text-xl font-semibold mb-4">Histórico de Transações</h2>
-        <ul className="space-y-2">
-          {transactions.map(t => (
-            <li key={t.id} className="flex justify-between items-center p-2 bg-gray-100 rounded">
-              <span>{t.description}</span>
-              <span className={t.amount >= 0 ? 'text-green-600' : 'text-red-600'}>
-                R$ {Math.abs(t.amount).toFixed(2)}
-              </span>
-              <button
-                onClick={() => deleteTransaction(t.id)}
-                className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-              >
-                Excluir
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Histórico de Transações</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-2">
+            {transactions.map(t => (
+              <li key={t.id} className="flex justify-between items-center p-2 bg-gray-100 rounded">
+                <span>{t.description}</span>
+                <span className={t.amount >= 0 ? 'text-green-600' : 'text-red-600'}>
+                  R$ {Math.abs(t.amount).toFixed(2)}
+                </span>
+                <Button variant="ghost" onClick={() => deleteTransaction(t.id)}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
 
-      <div className="bg-white shadow rounded-lg p-6 mt-6">
-        <h2 className="text-xl font-semibold mb-4">Gráfico de Transações</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line type="monotone" dataKey="amount" stroke="#8884d8" />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Gráfico de Transações</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="amount" stroke="#8884d8" />
+            </LineChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
-export default App;
+export default FinanceApp;
